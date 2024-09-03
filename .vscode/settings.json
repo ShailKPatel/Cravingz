@@ -1,0 +1,16 @@
+{
+    "java.project.sourcePaths": ["src"],
+    "java.project.outputPath": "bin",
+    "java.project.referencedLibraries": [
+        "lib/**/*.jar",
+        "m:\\Coding\\mysql-connector-j-9.0.0.jar"
+    ],
+    "java.debug.settings.onBuildFailureProceed": true,
+    "cSpell.words": [
+        "CONCAT",
+        "SQLEXCEPTION",
+        "TIMESTAMPADD",
+        "TIMESTAMPDIFF",
+        "VARCHAR"
+    ]
+}

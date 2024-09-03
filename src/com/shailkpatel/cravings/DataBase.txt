@@ -1,0 +1,2626 @@
+DROP DATABASE IF EXISTS cravings;
+CREATE DATABASE cravings;
+USE cravings;
+
+-- -----------------------------------------------------------------------------------------------
+CREATE TABLE Cuisine (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(32) NOT NULL UNIQUE
+);
+
+CREATE TABLE Diet (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(32) NOT NULL UNIQUE
+);
+
+CREATE TABLE Course (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(32) NOT NULL UNIQUE
+);
+
+CREATE TABLE Theme (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(32) NOT NULL UNIQUE
+);
+
+-- Procedures----------------------------------------------
+
+-- Procedure to insert into Cuisine
+DELIMITER $$
+
+CREATE PROCEDURE InsertCuisine(
+    IN p_name VARCHAR(32),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    INSERT INTO Cuisine (name)
+    VALUES (p_name);
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+-- Procedure to update Cuisine name using ID
+DELIMITER $$
+
+CREATE PROCEDURE UpdateCuisineName(
+    IN p_id INT,
+    IN p_new_name VARCHAR(32),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE Cuisine
+    SET name = p_new_name
+    WHERE id = p_id;
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+-- Procedure to insert into Diet
+DELIMITER $$
+
+CREATE PROCEDURE InsertDiet(
+    IN p_name VARCHAR(32),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    INSERT INTO Diet (name)
+    VALUES (p_name);
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+-- Procedure to update Diet name using ID
+DELIMITER $$
+
+CREATE PROCEDURE UpdateDietName(
+    IN p_id INT,
+    IN p_new_name VARCHAR(32),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE Diet
+    SET name = p_new_name
+    WHERE id = p_id;
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+-- Procedure to insert into Course
+DELIMITER $$
+
+CREATE PROCEDURE InsertCourse(
+    IN p_name VARCHAR(32),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    INSERT INTO Course (name)
+    VALUES (p_name);
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+-- Procedure to update Course name using ID
+DELIMITER $$
+
+CREATE PROCEDURE UpdateCourseName(
+    IN p_id INT,
+    IN p_new_name VARCHAR(32),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE Course
+    SET name = p_new_name
+    WHERE id = p_id;
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+-- Procedure to insert into Theme
+DELIMITER $$
+
+CREATE PROCEDURE InsertTheme(
+    IN p_name VARCHAR(32),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    INSERT INTO Theme (name)
+    VALUES (p_name);
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+-- Procedure to update Theme name using ID
+DELIMITER $$
+
+CREATE PROCEDURE UpdateThemeName(
+    IN p_id INT,
+    IN p_new_name VARCHAR(32),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE Theme
+    SET name = p_new_name
+    WHERE id = p_id;
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+
+-- -----------------------------------------------------------------------------------------------
+CREATE TABLE Dish (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(32) NOT NULL,
+  price INT NOT NULL,
+  course_id INT NOT NULL,
+  no_of_stars INT DEFAULT 0,
+  no_of_reviews INT DEFAULT 0,
+  no_of_orders INT DEFAULT 0,
+  preparation_time INT NOT NULL CHECK (preparation_time > 0),
+  FOREIGN KEY (course_id) REFERENCES Course(id)
+);
+
+
+-- Procedures----------------------------------------------
+
+-- Procedure to insert Dish
+DELIMITER $$
+
+CREATE PROCEDURE InsertDish(
+    IN p_name VARCHAR(32),
+    IN p_price INT,
+    IN p_course_id INT,
+    IN p_preparation_time INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    INSERT INTO Dish (name, price, course_id, preparation_time)
+    VALUES (p_name, p_price, p_course_id, p_preparation_time);
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE dishReview(
+    IN p_dish_id INT,
+    IN p_stars INT
+)
+BEGIN
+    
+
+    UPDATE Dish
+    SET no_of_stars = no_of_stars + p_stars,
+        no_of_reviews = no_of_reviews + 1
+    WHERE id = p_dish_id;
+
+END $$
+
+DELIMITER ;
+
+
+
+
+-- Procedure to increment dish order
+
+DELIMITER $$
+
+CREATE PROCEDURE IncrementDishOrders(IN dishId INT)
+BEGIN
+    UPDATE Dish
+    SET no_of_orders = no_of_orders + 1
+    WHERE id = dishId;
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+--  Procedure to update name
+DELIMITER $$
+
+CREATE PROCEDURE UpdateDishName(
+    IN p_dish_id INT,
+    IN p_name VARCHAR(32),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE Dish
+    SET name = p_name
+    WHERE id = p_dish_id;
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+
+--  Procedure to update price
+DELIMITER $$
+
+CREATE PROCEDURE UpdateDishPrice(
+    IN p_dish_id INT,
+    IN p_price INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE Dish
+    SET price = p_price
+    WHERE id = p_dish_id;
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+--  Procedure to update course_id
+DELIMITER $$
+
+CREATE PROCEDURE UpdateDishCourseId(
+    IN p_dish_id INT,
+    IN p_course_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE Dish
+    SET course_id = p_course_id
+    WHERE id = p_dish_id;
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+
+--  Procedure to update course_id
+DELIMITER $$
+
+CREATE PROCEDURE UpdateDishPreparationTime(
+    IN p_dish_id INT,
+    IN p_preparation_time INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE Dish
+    SET preparation_time = p_preparation_time
+    WHERE id = p_dish_id;
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+
+
+-- -----------------------------------------------------------------------------------------------
+CREATE TABLE Dish_Diet (
+    dish_id INT NOT NULL,
+    diet_id INT NOT NULL,
+    PRIMARY KEY (dish_id, diet_id),
+    FOREIGN KEY (dish_id) REFERENCES Dish(id),
+    FOREIGN KEY (diet_id) REFERENCES Diet(id)
+);
+
+-- Procedures----------------------------------------------
+DELIMITER $$
+
+CREATE PROCEDURE InsertIntoDishDiet(
+    IN p_dish_id INT,
+    IN p_diet_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE entry_count INT;
+
+    -- Count the number of entries with the given dish_id
+    SELECT COUNT(*) INTO entry_count
+    FROM Dish_Diet
+    WHERE dish_id = p_dish_id;
+
+    -- If there are <= 5 entries with the given dish_id, proceed with the insertion
+    IF entry_count < 6 THEN
+        INSERT INTO Dish_Diet (dish_id, diet_id)
+        VALUES (p_dish_id, p_diet_id);
+        SET p_success = TRUE;
+    ELSE
+        -- If there are more than 5 entries, do not insert
+        SET p_success = FALSE;
+    END IF;
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE DeleteFromDishDiet(
+    IN p_dish_id INT,
+    IN p_diet_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    -- Delete the record with the given dish_id and diet_id
+    DELETE FROM Dish_Diet
+    WHERE dish_id = p_dish_id AND diet_id = p_diet_id;
+
+    IF ROW_COUNT() > 0 THEN
+        SET p_success = TRUE;
+    ELSE
+        SET p_success = FALSE;
+    END IF;
+END $$
+
+DELIMITER ;
+
+
+-- -----------------------------------------------------------------------------------------------
+CREATE TABLE Dish_Cuisine (
+    dish_id INT NOT NULL,
+    cuisine_id INT NOT NULL,
+    PRIMARY KEY (dish_id, cuisine_id),
+    FOREIGN KEY (dish_id) REFERENCES Dish(id),
+    FOREIGN KEY (cuisine_id) REFERENCES Cuisine(id)
+);
+
+-- Procedures----------------------------------------------
+
+DELIMITER $$
+
+CREATE PROCEDURE InsertIntoDishCuisine(
+    IN p_dish_id INT,
+    IN p_cuisine_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE entry_count INT;
+
+    -- Count the number of entries with the given dish_id
+    SELECT COUNT(*) INTO entry_count
+    FROM Dish_Cuisine
+    WHERE dish_id = p_dish_id;
+
+    -- If there are <= 3 entries with the given dish_id, proceed with the insertion
+    IF entry_count < 4 THEN
+        INSERT INTO Dish_Cuisine (dish_id, cuisine_id)
+        VALUES (p_dish_id, p_cuisine_id);
+        SET p_success = TRUE;
+    ELSE
+        -- If there are 3 or more entries, do not insert
+        SET p_success = FALSE;
+    END IF;
+END $$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE DeleteFromDishCuisine(
+    IN p_dish_id INT,
+    IN p_cuisine_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE row_count INT;
+
+    -- Delete the record with the given dish_id and cuisine_id
+    DELETE FROM Dish_Cuisine
+    WHERE dish_id = p_dish_id AND cuisine_id = p_cuisine_id;
+
+    -- Check if a row was affected (deleted)
+    SET row_count = ROW_COUNT();
+
+    -- If a row was deleted, set p_success to TRUE, otherwise set it to FALSE
+    IF row_count > 0 THEN
+        SET p_success = TRUE;
+    ELSE
+        SET p_success = FALSE;
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------
+
+CREATE TABLE Restaurant (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(32) NOT NULL,
+  address VARCHAR(64) NOT NULL,
+  theme_id INT NOT NULL,
+  numberOfStars INT DEFAULT 0,
+  numberOfReviews INT DEFAULT 0,
+  rCode CHAR(8) DEFAULT NULL,
+  revenue INT DEFAULT 0,
+  isAcceptingOrders BOOLEAN DEFAULT FALSE,
+  FOREIGN KEY (theme_id) REFERENCES Theme(id)
+);
+
+-- Procedures----------------------------------------------
+
+-- Insert into Restaurant
+DELIMITER $$
+
+CREATE PROCEDURE InsertRestaurant(
+    IN p_name VARCHAR(32),
+    IN p_address VARCHAR(64),
+    IN p_theme_id INT,
+    IN p_rCode CHAR(8),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    INSERT INTO Restaurant (name, address, theme_id, rCode)
+    VALUES (p_name, p_address, p_theme_id, p_rCode);
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE UpdateRestaurantName(
+    IN p_restaurant_id INT,
+    IN p_new_name VARCHAR(32),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE Restaurant
+    SET name = p_new_name
+    WHERE id = p_restaurant_id;
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE UpdateRestaurantTheme(
+    IN restaurantID INT,
+    IN newThemeID INT,
+    OUT success BOOLEAN
+)
+BEGIN
+    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Update the theme of the specified restaurant
+    UPDATE Restaurant
+    SET theme_id = newThemeID
+    WHERE id = restaurantID;
+
+    -- Check if the update was successful
+    IF ROW_COUNT() > 0 THEN
+        SET success = TRUE;
+    ELSE
+        SET success = FALSE;
+    END IF;
+
+    COMMIT;
+END $$
+
+DELIMITER ;
+
+
+
+DELIMITER $$
+
+CREATE PROCEDURE StartAcceptingOrders(
+    IN p_restaurant_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE dish_count INT;
+
+    -- Check if there are any dishes associated with the given restaurant
+    SELECT COUNT(*) INTO dish_count
+    FROM Restaurant_Menu
+    WHERE restaurant_id = p_restaurant_id;
+
+    -- If dishes are found, update isAcceptingOrders
+    IF dish_count > 0 THEN
+        UPDATE Restaurant
+        SET isAcceptingOrders = TRUE
+        WHERE id = p_restaurant_id;
+
+        SET p_success = TRUE;
+    ELSE
+        SET p_success = FALSE;  -- No dishes found for the restaurant
+    END IF;
+END $$
+
+DELIMITER ;
+
+
+
+-- Stop Accepting orders
+DELIMITER $$
+
+CREATE PROCEDURE StopAcceptingOrders(
+    IN p_restaurant_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE Restaurant
+    SET isAcceptingOrders = FALSE
+    WHERE id = p_restaurant_id;
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+-- Update Restaurant address
+DELIMITER $$
+
+CREATE PROCEDURE UpdateRestaurantAddress(
+    IN p_restaurant_id INT,
+    IN p_new_address VARCHAR(64),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE Restaurant
+    SET address = p_new_address
+    WHERE id = p_restaurant_id;
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+-- Add restaurant review
+
+DELIMITER $$
+
+CREATE PROCEDURE AddRestaurantReview(
+    IN p_restaurant_id INT,
+    IN p_review INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Validate the review input
+    IF p_review BETWEEN 0 AND 5 THEN
+        UPDATE Restaurant
+        SET numberOfStars = numberOfStars + p_review,
+            numberOfReviews = numberOfReviews + 1
+        WHERE id = p_restaurant_id;
+
+        COMMIT;
+        SET p_success = TRUE;
+    ELSE
+        SET p_success = FALSE;
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Update rCode
+DELIMITER $$
+
+CREATE PROCEDURE UpdateRestaurantCode(
+    IN p_restaurant_id INT,
+    IN p_new_rCode CHAR(8),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE Restaurant
+    SET rCode = p_new_rCode
+    WHERE id = p_restaurant_id;
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+-- Add to Revenue
+
+DELIMITER $$
+
+CREATE PROCEDURE AddToRestaurantRevenue(
+    IN p_restaurant_id INT,
+    IN p_amount INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    UPDATE Restaurant
+    SET revenue = revenue + p_amount
+    WHERE id = p_restaurant_id;
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+
+-- -----------------------------------------------------------------------------------------------
+
+CREATE TABLE Restaurant_Menu (
+    restaurant_id INT NOT NULL,
+    dish_id INT NOT NULL,
+    PRIMARY KEY (restaurant_id, dish_id),
+    FOREIGN KEY (restaurant_id) REFERENCES Restaurant(id),
+    FOREIGN KEY (dish_id) REFERENCES Dish(id)
+);
+
+-- Procedures----------------------------------------------
+
+DELIMITER $$
+
+CREATE PROCEDURE InsertIntoRestaurantMenu(
+    IN p_restaurant_id INT,
+    IN p_dish_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE entry_count INT;
+
+    -- Count the number of entries with the given restaurant_id
+    SELECT COUNT(*) INTO entry_count
+    FROM Restaurant_Menu
+    WHERE restaurant_id = p_restaurant_id;
+
+    -- If there are <= 100 entries with the given restaurant_id, proceed with the insertion
+    IF entry_count < 101 THEN
+        INSERT INTO Restaurant_Menu (restaurant_id, dish_id)
+        VALUES (p_restaurant_id, p_dish_id);
+        SET p_success = TRUE;
+    ELSE
+        -- If there are 100 or more entries, do not insert
+        SET p_success = FALSE;
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- Procedures----------------------------------------------
+
+DELIMITER $$
+
+CREATE PROCEDURE DeleteFromRestaurantMenu(
+    IN p_restaurant_id INT,
+    IN p_dish_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE row_count INT;
+
+    -- Delete the record with the given restaurant_id and dish_id
+    DELETE FROM Restaurant_Menu
+    WHERE restaurant_id = p_restaurant_id AND dish_id = p_dish_id;
+
+    -- Check if a row was affected (deleted)
+    SET row_count = ROW_COUNT();
+
+    -- If a row was deleted, set p_success to TRUE, otherwise set it to FALSE
+    IF row_count > 0 THEN
+        SET p_success = TRUE;
+    ELSE
+        SET p_success = FALSE;
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------
+
+CREATE TABLE Customer (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(32) NOT NULL,
+  phone_number CHAR(10) NOT NULL UNIQUE,
+  email VARCHAR(30) NOT NULL UNIQUE,
+  password CHAR(64) NOT NULL,
+  favorite_food VARCHAR(50),
+  isActive BOOLEAN DEFAULT TRUE,
+  isOnline BOOLEAN DEFAULT TRUE
+);
+
+-- To store soft deleted customer
+  CREATE TABLE Deleted_Customer (
+    customer_id INT NOT NULL,
+    deleted_timestamp TIMESTAMP DEFAULT NOW(),
+    FOREIGN KEY (customer_id) REFERENCES Customer(id)
+  );
+
+-- To store customer transactions
+CREATE TABLE Customer_Logs (
+  customer_id INT NOT NULL,
+  activity VARCHAR(50) NOT NULL,
+  time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  -- customer_id is not foreign key to avoid problems on deletion
+);
+
+-- Procedures----------------------------------------------
+
+-- Register
+DELIMITER $$
+
+CREATE PROCEDURE registerCustomer(
+    IN p_name VARCHAR(32),
+    IN p_phone_number CHAR(10),
+    IN p_email VARCHAR(30),
+    IN p_password CHAR(64),
+    IN p_favorite_food VARCHAR(50),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Insert a new customer
+    INSERT INTO Customer (name, phone_number, email, password, favorite_food)
+    VALUES (p_name, p_phone_number, p_email, p_password, p_favorite_food);
+    
+    -- Log customer registration
+    INSERT INTO Customer_Logs (customer_id, activity)
+    VALUES (LAST_INSERT_ID(), 'Registered account');
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+-- Update name
+DELIMITER $$
+
+CREATE PROCEDURE UpdateCustomerName(
+    IN p_customer_id INT,
+    IN p_name VARCHAR(32),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Update customer name
+    UPDATE Customer
+    SET name = p_name
+    WHERE id = p_customer_id;
+    
+    -- Log name update
+    INSERT INTO Customer_Logs (customer_id, activity)
+    VALUES (p_customer_id, 'Updated name');
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+
+-- Update Phone Number
+DELIMITER $$
+
+CREATE PROCEDURE UpdateCustomerPhoneNumber(
+    IN p_customer_id INT,
+    IN p_phone_number CHAR(10),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Update customer phone number
+    UPDATE Customer
+    SET phone_number = p_phone_number
+    WHERE id = p_customer_id;
+    
+    -- Log phone number update
+    INSERT INTO Customer_Logs (customer_id, activity)
+    VALUES (p_customer_id, 'Updated phone number');
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+
+-- Update email
+DELIMITER $$
+
+CREATE PROCEDURE UpdateCustomerEmail(
+    IN p_customer_id INT,
+    IN p_email VARCHAR(30),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Update customer email
+    UPDATE Customer
+    SET email = p_email
+    WHERE id = p_customer_id;
+    
+    -- Log email update
+    INSERT INTO Customer_Logs (customer_id, activity)
+    VALUES (p_customer_id, 'Updated email');
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+
+-- Update password
+DELIMITER $$
+
+CREATE PROCEDURE UpdateCustomerPassword(
+    IN p_customer_id INT,
+    IN p_password CHAR(64),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Update customer password
+    UPDATE Customer
+    SET password = p_password
+    WHERE id = p_customer_id;
+    
+    -- Log password update
+    INSERT INTO Customer_Logs (customer_id, activity)
+    VALUES (p_customer_id, 'Updated password');
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+
+-- Update favorite food
+DELIMITER $$
+
+CREATE PROCEDURE UpdateCustomerFavoriteFood(
+    IN p_customer_id INT,
+    IN p_favorite_food VARCHAR(50),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Update customer favorite food
+    UPDATE Customer
+    SET favorite_food = p_favorite_food
+    WHERE id = p_customer_id;
+    
+    -- Log favorite food update
+    INSERT INTO Customer_Logs (customer_id, activity)
+    VALUES (p_customer_id, 'Updated favorite food');
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+-- log in
+DELIMITER $$
+
+CREATE PROCEDURE LoginCustomer(
+    IN p_customer_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Set isOnline to TRUE
+    UPDATE Customer
+    SET isOnline = TRUE
+    WHERE id = p_customer_id;
+
+    -- Insert log for login activity
+    INSERT INTO Customer_Logs (customer_id, activity)
+    VALUES (p_customer_id, 'Logged In');
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+-- Log OUT
+DELIMITER $$
+
+CREATE PROCEDURE LogoutCustomer(
+    IN p_customer_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Set isOnline to FALSE
+    UPDATE Customer
+    SET isOnline = FALSE
+    WHERE id = p_customer_id;
+
+    -- Insert log for logout activity
+    INSERT INTO Customer_Logs (customer_id, activity)
+    VALUES (p_customer_id, 'Logged Out');
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+
+-- soft delete 
+DELIMITER $$
+
+CREATE PROCEDURE SoftDeleteCustomer(
+    IN p_customer_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Set isActive to FALSE
+    UPDATE Customer
+    SET isActive = FALSE
+    WHERE id = p_customer_id;
+
+    -- Log soft delete
+    INSERT INTO Customer_Logs (customer_id, activity)
+    VALUES (p_customer_id, 'Soft deleted account');
+
+    -- Insert into Deleted_Customer
+    INSERT INTO Deleted_Customer (customer_id)
+    VALUES (p_customer_id);
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+-- cancel soft delete
+DELIMITER $$
+
+CREATE PROCEDURE CancelSoftDeleteCustomer(
+    IN p_customer_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Set isActive to TRUE
+    UPDATE Customer
+    SET isActive = TRUE
+    WHERE id = p_customer_id;
+
+    -- Log cancel soft delete
+    INSERT INTO Customer_Logs (customer_id, activity)
+    VALUES (p_customer_id, 'Soft delete canceled');
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE ConfirmCustomerByPhoneAndFood(
+    IN p_phone_number CHAR(10),
+    IN p_favorite_food VARCHAR(50),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE matching_count INT;
+
+    -- Check if a record exists with the given phone number and favorite food
+    SELECT COUNT(*) INTO matching_count
+    FROM Customer
+    WHERE phone_number = p_phone_number AND favorite_food = p_favorite_food;
+
+    -- If a matching record is found, set success to TRUE, otherwise set it to FALSE
+    IF matching_count > 0 THEN
+        SET p_success = TRUE;
+    ELSE
+        SET p_success = FALSE;
+    END IF;
+END $$
+
+DELIMITER ;
+
+
+
+
+-- -----------------------------------------------------------------------------------------------
+
+CREATE TABLE Customer_Address (
+    address_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    address VARCHAR(100) NOT NULL,
+    FOREIGN KEY (customer_id) REFERENCES Customer(id)
+);
+
+-- Procedures----------------------------------------------
+
+DELIMITER $$
+
+DELIMITER $$
+
+CREATE PROCEDURE InsertIntoCustomerAddress(
+    IN p_customer_id INT,
+    IN p_address VARCHAR(100),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE entry_count INT;
+
+    -- Count the number of entries with the given customer_id
+    SELECT COUNT(*) INTO entry_count
+    FROM Customer_Address
+    WHERE customer_id = p_customer_id;
+
+    -- If there are less than 5 entries with the given customer_id, proceed with the insertion
+    IF entry_count < 5 THEN
+        INSERT INTO Customer_Address (customer_id, address)
+        VALUES (p_customer_id, p_address);
+        SET p_success = TRUE;
+        
+        -- Log the insertion
+        INSERT INTO Customer_Logs (customer_id, activity)
+        VALUES (p_customer_id, CONCAT('Inserted new address: ', p_address));
+    ELSE
+        -- If there are 5 or more entries, do not insert
+        SET p_success = FALSE;
+        
+        -- Log the failure to insert
+        INSERT INTO Customer_Logs (customer_id, activity)
+        VALUES (p_customer_id, 'Failed to insert new address (maximum limit reached)');
+    END IF;
+END $$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE DeleteFromCustomerAddress(
+    IN p_customer_id INT,
+    IN p_address VARCHAR(100),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE row_count INT;
+
+    -- Delete the record with the given customer_id and address
+    DELETE FROM Customer_Address
+    WHERE customer_id = p_customer_id AND address = p_address;
+
+    -- Check if a row was affected (deleted)
+    SET row_count = ROW_COUNT();
+
+    -- If a row was deleted, set p_success to TRUE, otherwise set it to FALSE
+    IF row_count > 0 THEN
+        SET p_success = TRUE;
+
+        -- Log the deletion
+        INSERT INTO Customer_Logs (customer_id, activity)
+        VALUES (p_customer_id, CONCAT('Deleted address: ', p_address));
+    ELSE
+        SET p_success = FALSE;
+        
+        -- Log the failure to delete (address not found)
+        INSERT INTO Customer_Logs (customer_id, activity)
+        VALUES (p_customer_id, CONCAT('Failed to delete address (not found): ', p_address));
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------
+
+CREATE TABLE Customer_Cart (
+    customer_id INT NOT NULL,
+    dish_id INT NOT NULL,
+    PRIMARY KEY (customer_id, dish_id),
+    FOREIGN KEY (customer_id) REFERENCES Customer(id),
+    FOREIGN KEY (dish_id) REFERENCES Dish(id)
+);
+
+-- Procedures----------------------------------------------
+
+DELIMITER $$
+
+CREATE PROCEDURE InsertIntoCustomerCart(
+    IN p_customer_id INT,
+    IN p_dish_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE entry_count INT;
+
+    -- Count the number of entries with the given customer_id
+    SELECT COUNT(*) INTO entry_count
+    FROM Customer_Cart
+    WHERE customer_id = p_customer_id;
+
+    -- If there are less than 50 entries with the given customer_id, proceed with the insertion
+    IF entry_count < 50 THEN
+        INSERT INTO Customer_Cart (customer_id, dish_id)
+        VALUES (p_customer_id, p_dish_id);
+        SET p_success = TRUE;
+        
+        -- Log the insertion
+        INSERT INTO Customer_Logs (customer_id, activity)
+        VALUES (p_customer_id, CONCAT('Inserted dish ID: ', p_dish_id, ' into cart'));
+    ELSE
+        -- If there are 50 or more entries, do not insert
+        SET p_success = FALSE;
+        
+        -- Log the failure to insert
+        INSERT INTO Customer_Logs (customer_id, activity)
+        VALUES (p_customer_id, 'Failed to insert dish into cart (maximum limit reached)');
+    END IF;
+END $$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE DeleteFromCustomerCart(
+    IN p_customer_id INT,
+    IN p_dish_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE row_count INT;
+
+    -- Delete the record with the given customer_id and dish_id
+    DELETE FROM Customer_Cart
+    WHERE customer_id = p_customer_id AND dish_id = p_dish_id;
+
+    -- Check if a row was affected (deleted)
+    SET row_count = ROW_COUNT();
+
+    -- If a row was deleted, set p_success to TRUE, otherwise set it to FALSE
+    IF row_count > 0 THEN
+        SET p_success = TRUE;
+        
+        -- Log the deletion
+        INSERT INTO Customer_Logs (customer_id, activity)
+        VALUES (p_customer_id, CONCAT('Deleted dish ID: ', p_dish_id, ' from cart'));
+    ELSE
+        SET p_success = FALSE;
+        
+        -- Log the failure to delete (dish not found)
+        INSERT INTO Customer_Logs (customer_id, activity)
+        VALUES (p_customer_id, CONCAT('Failed to delete dish ID: ', p_dish_id, ' from cart (not found)'));
+    END IF;
+END $$
+
+DELIMITER ;
+
+-- -----------------------------------------------------------------------------------------------
+
+-- Procedure to hard delete customer
+DELIMITER $$
+
+CREATE PROCEDURE HardDeleteCustomer(
+    IN p_customer_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Delete records from Customer_Address
+    DELETE FROM Customer_Address
+    WHERE customer_id = p_customer_id;
+
+    -- Delete records from Customer_Cart
+    DELETE FROM Customer_Cart
+    WHERE customer_id = p_customer_id;
+
+    -- Log hard delete
+    INSERT INTO Customer_Logs (customer_id, activity)
+    VALUES (p_customer_id, 'Hard deleted account');
+
+    -- Delete from Deleted_Customer
+    DELETE FROM Deleted_Customer
+    WHERE customer_id = p_customer_id;
+
+    -- Delete the customer record
+    DELETE FROM Customer
+    WHERE id = p_customer_id;
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+-- Hard delete where soft delete time is past 30 days
+DELIMITER $$
+
+CREATE PROCEDURE CheckHardDelete(
+    OUT p_time_left_minutes INT
+)
+BEGIN
+    DECLARE done INT DEFAULT 0;
+    DECLARE customer_id INT;
+    DECLARE delete_timestamp TIMESTAMP;
+    DECLARE next_delete_time TIMESTAMP;
+    DECLARE time_left INT DEFAULT 30;
+
+    -- Declare a cursor to iterate through soft-deleted customers whose timestamp is older than 30 days
+    DECLARE cur1 CURSOR FOR
+    SELECT customer_id, deleted_timestamp 
+    FROM Deleted_Customer 
+    WHERE deleted_timestamp + INTERVAL 30 DAY <= NOW();
+
+    -- Declare a cursor to find the closest timestamp that hasn't yet reached the 30-day mark
+    DECLARE cur2 CURSOR FOR
+    SELECT customer_id, deleted_timestamp 
+    FROM Deleted_Customer 
+    WHERE deleted_timestamp + INTERVAL 30 DAY > NOW()
+    ORDER BY deleted_timestamp ASC
+    LIMIT 1;
+
+    -- Declare a handler to close the cursor when there are no more rows
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+
+    -- Start a transaction
+    START TRANSACTION;
+
+    -- Open the cursor to find and hard delete customers older than 30 days
+    OPEN cur1;
+    read_loop: LOOP
+        FETCH cur1 INTO customer_id, delete_timestamp;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Call the HardDeleteCustomer procedure
+        CALL HardDeleteCustomer(customer_id, @success);
+
+        -- Check for success, if not rollback
+        IF @success = FALSE THEN
+            ROLLBACK;
+            SET p_time_left_minutes = -1;
+            LEAVE read_loop;
+        END IF;
+    END LOOP;
+    CLOSE cur1;
+
+    -- Reset the done variable for the next cursor
+    SET done = 0;
+
+    -- Open the cursor to find the closest timestamp that hasn't reached the 30-day mark yet
+    OPEN cur2;
+    FETCH cur2 INTO customer_id, delete_timestamp;
+    IF NOT done THEN
+        SET next_delete_time = delete_timestamp + INTERVAL 30 DAY;
+        SET p_time_left_minutes = TIMESTAMPDIFF(MINUTE, NOW(), next_delete_time);
+    ELSE
+        -- No more customers to delete, set default time to 30 minutes
+        SET p_time_left_minutes = 30;
+    END IF;
+    CLOSE cur2;
+
+    -- Commit the transaction
+    COMMIT;
+END $$
+
+DELIMITER ;
+
+
+-- -----------------------------------------------------------------------------------------------
+-- To store customer orders
+CREATE TABLE Customer_Order (
+    order_id INT AUTO_INCREMENT PRIMARY KEY,
+    address_id INT NOT NULL,
+    customer_id INT NOT NULL,
+    restaurant_id INT NOT NULL,
+    order_time TIMESTAMP,
+    isReviewed BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (address_id) REFERENCES Customer_Address(address_id),
+    FOREIGN KEY (restaurant_id) REFERENCES Restaurant(id)
+    -- Customer id not set as foreign key so when they delete account it doesn't affect this table
+);
+
+
+-- Procedures----------------------------------------------
+DELIMITER $$
+
+CREATE PROCEDURE InsertCustomerOrder(
+    IN p_address_id INT,
+    IN p_restaurant_id INT,
+    IN p_customer_id INT,
+    IN p_order_time TIMESTAMP,
+    OUT p_success BOOLEAN,
+    OUT p_order_id INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Insert a new order into the Customer_Order table with the provided order_time
+    INSERT INTO Customer_Order (address_id, restaurant_id, order_time, customer_id)
+    VALUES (p_address_id, p_restaurant_id, p_order_time, p_customer_id);
+
+    -- Retrieve the last inserted order ID
+    SET p_order_id = LAST_INSERT_ID();
+
+    -- Log the creation of the order with the retrieved order ID
+    INSERT INTO Customer_Logs (customer_id, activity)
+    VALUES (p_customer_id, CONCAT('Order completed with Order ID: ', p_order_id));
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+
+
+-- isReviewed
+DELIMITER $$
+
+CREATE PROCEDURE MarkAsReviewed(
+    IN p_order_id INT,
+    IN p_restaurant_id INT,
+    IN p_rating INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE v_customer_id INT;
+
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Retrieve the customer ID associated with the order
+    SELECT customer_id INTO v_customer_id
+    FROM Customer_Order
+    WHERE order_id = p_order_id;
+
+    -- Call the AddRestaurantReview procedure with the provided rating
+    CALL AddRestaurantReview(p_restaurant_id, p_rating, p_success);
+
+    -- If the review was successfully added, mark the order as reviewed and log the review
+    IF p_success = TRUE THEN
+        -- Mark as reviewed
+        UPDATE Customer_Order
+        SET isReviewed = TRUE
+        WHERE order_id = p_order_id;
+
+
+        -- Log the review in Customer_Logs
+        INSERT INTO Customer_Logs (customer_id, activity)
+        VALUES (v_customer_id, CONCAT('Reviewed Restaurant ID: ', p_restaurant_id, ' with ', p_rating, ' stars'));
+
+        COMMIT;
+    ELSE
+        ROLLBACK;
+    END IF;
+END $$
+
+DELIMITER ;
+
+
+
+-- -----------------------------------------------------------------------------------------------
+-- Table to store dishes by orders
+CREATE TABLE Order_Dish (
+    order_id INT NOT NULL,
+    dish_id INT NOT NULL,
+    quantity INT NOT NULL CHECK (quantity > 0),
+    reviewed BOOLEAN DEFAULT FALSE,
+    PRIMARY KEY (order_id, dish_id), -- Composite primary key
+    FOREIGN KEY (order_id) REFERENCES Customer_Order(order_id),
+    FOREIGN KEY (dish_id) REFERENCES Dish(id)
+);
+
+-- Procedures----------------------------------------------
+
+-- Procedure to insert into Order_Dish
+DELIMITER $$
+
+CREATE PROCEDURE InsertOrderDish(
+    IN p_order_id INT,
+    IN p_dish_id INT,
+    IN p_quantity INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Insert a new record into the Order_Dish table
+    INSERT INTO Order_Dish (order_id, dish_id, quantity)
+    VALUES (p_order_id, p_dish_id, p_quantity);
+
+    -- Log the insertion with order_id and dish_id
+    INSERT INTO Customer_Logs (customer_id, activity)
+    SELECT co.customer_id, CONCAT('Added Dish ID: ', p_dish_id, ' to Order ID: ', p_order_id)
+    FROM Customer_Order co
+    WHERE co.order_id = p_order_id;
+
+    -- Call the procedure to increment the number of orders for the dish
+    CALL IncrementDishOrders(p_dish_id, p_success);
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+-- Procedure to review a dish within an order
+DELIMITER $$
+
+CREATE PROCEDURE ReviewOrderDish(
+    IN p_order_id INT,
+    IN p_dish_id INT,
+    IN p_rating INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE v_quantity INT;
+    DECLARE review_failed BOOLEAN DEFAULT FALSE;
+
+    -- Initialize p_success to TRUE by default
+    SET p_success = TRUE;
+
+    -- Retrieve the quantity of the dish in the order
+    SELECT quantity INTO v_quantity
+    FROM Order_Dish
+    WHERE order_id = p_order_id AND dish_id = p_dish_id;
+
+    -- Loop to add the review based on the quantity
+    WHILE v_quantity > 0 DO
+        CALL dishReview(p_dish_id, p_rating, p_success);
+
+        -- Check if dishReview failed
+        IF p_success = FALSE THEN
+            SET review_failed = TRUE;
+            SET p_success = FALSE;
+            -- Exit the loop by breaking the condition
+            SET v_quantity = 0;
+        ELSE
+            SET v_quantity = v_quantity - 1;
+        END IF;
+    END WHILE;
+
+    -- Set the reviewed column to TRUE for the dish in the order if no review failed
+    IF NOT review_failed THEN
+        UPDATE Order_Dish
+        SET reviewed = TRUE
+        WHERE order_id = p_order_id AND dish_id = p_dish_id;
+    END IF;
+
+END $$
+
+DELIMITER ;
+
+
+-- -----------------------------------------------------------------------------------------------
+-- To store Orders currently cooking
+CREATE TABLE OrdersCooking (
+    cooking_order_id INT AUTO_INCREMENT PRIMARY KEY,
+    customer_id INT NOT NULL,
+    restaurant_id INT NOT NULL,
+    address_id INT NOT NULL,
+    start_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (customer_id) REFERENCES Customer(id),
+    FOREIGN KEY (restaurant_id) REFERENCES Restaurant(id)
+);
+
+
+
+CREATE TABLE OrdersCookingDish (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    cooking_order_id INT NOT NULL,
+    dish_id INT NOT NULL,
+    quantity INT CHECK (quantity > 0),
+    FOREIGN KEY (cooking_order_id) REFERENCES OrdersCooking(cooking_order_id),
+    FOREIGN KEY (dish_id) REFERENCES Dish(id)
+);
+
+-- To Insert Into Orders Cooking
+
+DELIMITER $$
+
+CREATE PROCEDURE InsertIntoOrdersCooking(
+    IN p_customer_id INT,
+    IN p_restaurant_id INT,
+    IN p_address_id INT,
+    IN p_dish_id INT,
+    IN p_quantity INT,
+    OUT p_success BOOLEAN,
+    OUT p_order_id INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Insert a new record into the OrdersCooking table
+    INSERT INTO OrdersCooking (customer_id, restaurant_id, address_id)
+    VALUES (p_customer_id, p_restaurant_id, p_address_id);
+
+    -- Retrieve the last inserted order ID
+    SET p_order_id = LAST_INSERT_ID();
+
+    -- Insert into the OrdersCookingDish table
+    INSERT INTO OrdersCookingDish (cooking_order_id, dish_id, quantity)
+    VALUES (p_order_id, p_dish_id, p_quantity);
+
+    -- Log the creation of the order with the retrieved order ID
+    INSERT INTO Customer_Logs (customer_id, activity)
+    VALUES (p_customer_id, CONCAT('Order created with Order ID: ', p_order_id));
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+
+-- To Insert Into Orders Cooking Dish
+
+DELIMITER $$
+
+CREATE PROCEDURE InsertIntoOrdersCookingDish(
+    IN p_cooking_order_id INT,
+    IN p_dish_id INT,
+    IN p_quantity INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Insert a new record into the OrdersCookingDish table
+    INSERT INTO OrdersCookingDish (cooking_order_id, dish_id, quantity)
+    VALUES (p_cooking_order_id, p_dish_id, p_quantity);
+
+    -- Log the addition of the dish to the order
+    INSERT INTO Customer_Logs (customer_id, activity)
+    SELECT oc.customer_id, CONCAT('Added Dish ID: ', p_dish_id, ' with Quantity: ', p_quantity, ' to Order ID: ', p_cooking_order_id)
+    FROM OrdersCooking oc
+    WHERE oc.cooking_order_id = p_cooking_order_id;
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+-- Procedure takes in cooking_order_id, joins with OrdersCookingDish and Dish, finds dish with longest preparation time, adds 5 minutes to it, and then returns the total time taken to cook.
+DELIMITER $$
+
+CREATE PROCEDURE GetEstimatedCookingTime(
+    IN p_cooking_order_id INT,
+    OUT p_estimated_time INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        -- Set estimated time to NULL in case of any error
+        SET p_estimated_time = NULL;
+    END;
+
+    -- Find the maximum preparation time for the dishes in the order
+    SELECT MAX(d.preparation_time) + 5
+    INTO p_estimated_time
+    FROM OrdersCookingDish ocd
+    INNER JOIN Dish d ON ocd.dish_id = d.id
+    WHERE ocd.cooking_order_id = p_cooking_order_id;
+    
+    -- If no dishes found, set estimated time to NULL
+    IF p_estimated_time IS NULL THEN
+        SET p_estimated_time = 0;
+    END IF;
+
+END $$
+
+DELIMITER ;
+
+
+-- Procedure then inserts the completed orders into Customer_Order, deletes the relevant entries from OrdersCooking, 
+-- Procedure then inserts the completed order's dish into Order_Dish, deletes the relevant entries from OrdersCookingDish
+DELIMITER $$
+
+CREATE PROCEDURE ProcessCompletedOrder(
+    IN p_cooking_order_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE v_customer_id INT;
+    DECLARE v_restaurant_id INT;
+    DECLARE v_address_id INT;
+    DECLARE v_start_time TIMESTAMP;
+    DECLARE v_order_id INT;
+    DECLARE v_dish_id INT;
+    DECLARE v_quantity INT;
+    DECLARE v_done INT DEFAULT 0;
+
+    -- Declare cursor to select the dishes from OrdersCookingDish
+    DECLARE cur CURSOR FOR
+    SELECT dish_id, quantity
+    FROM OrdersCookingDish
+    WHERE cooking_order_id = p_cooking_order_id;
+
+    -- Handler for cursor end
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_done = 1;
+
+    -- Start transaction
+    START TRANSACTION;
+
+    -- Select the order details from OrdersCooking
+    SELECT customer_id, restaurant_id, address_id, start_time
+    INTO v_customer_id, v_restaurant_id, v_address_id, v_start_time
+    FROM OrdersCooking
+    WHERE cooking_order_id = p_cooking_order_id;
+
+    -- Insert into Customer_Order using the InsertCustomerOrder procedure
+    CALL InsertCustomerOrder(v_address_id, v_restaurant_id, v_customer_id, v_start_time, p_success, v_order_id);
+
+    -- If the insertion was successful, proceed with moving dishes
+    IF p_success THEN
+        -- Open the cursor to process each dish
+        OPEN cur;
+
+        move_loop: WHILE v_done = 0 DO
+            FETCH cur INTO v_dish_id, v_quantity;
+
+            -- If no more rows, exit the loop
+            IF v_done = 1 THEN
+                LEAVE move_loop;
+            END IF;
+
+            -- Insert into Order_Dish using the InsertOrderDish procedure
+            CALL InsertOrderDish(v_order_id, v_dish_id, v_quantity, p_success);
+
+            -- Check if the insertion was successful
+            IF p_success THEN
+                -- Delete the dish from OrdersCookingDish
+                DELETE FROM OrdersCookingDish
+                WHERE cooking_order_id = p_cooking_order_id
+                  AND dish_id = v_dish_id;
+            ELSE
+                -- If insertion failed, rollback and exit
+                ROLLBACK;
+                SET p_success = FALSE;
+                LEAVE move_loop;
+            END IF;
+        END WHILE;
+
+        -- Close the cursor
+        CLOSE cur;
+
+        -- Delete the order from OrdersCooking
+        DELETE FROM OrdersCooking
+        WHERE cooking_order_id = p_cooking_order_id;
+
+        -- Commit the transaction
+        COMMIT;
+        SET p_success = TRUE;
+    ELSE
+        -- If the insertion into Customer_Order failed, rollback the transaction
+        ROLLBACK;
+    END IF;
+
+END $$
+
+DELIMITER ;
+
+-- Returns the time remaining for the next entry to be deleted.
+DELIMITER $$
+
+CREATE PROCEDURE ManageCookingOrdersAndEstimateTime(
+    OUT p_time_remaining INT
+)
+BEGIN
+    DECLARE v_cooking_order_id INT;
+    DECLARE v_estimated_time INT;
+    DECLARE v_start_time TIMESTAMP;
+    DECLARE v_done INT DEFAULT 0;
+    DECLARE v_success BOOLEAN;
+
+    -- Declare cursor to select all orders in OrdersCooking
+    DECLARE cur CURSOR FOR
+    SELECT cooking_order_id, start_time
+    FROM OrdersCooking;
+
+    -- Handler for cursor end
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET v_done = 1;
+
+    -- Check if OrdersCooking is empty, if so return 5 minutes
+    IF (SELECT COUNT(*) FROM OrdersCooking) = 0 THEN
+        SET p_time_remaining = 5;
+    ELSE
+        -- Open the cursor
+        OPEN cur;
+
+        -- Loop through all orders in OrdersCooking
+        WHILE v_done = 0 DO
+            FETCH cur INTO v_cooking_order_id, v_start_time;
+
+            -- Check if cursor has reached the end
+            IF v_done = 1 THEN
+                -- Exit the loop
+                SET v_done = 1;
+            ELSE
+                -- Call the GetEstimatedCookingTime procedure to get the estimated time
+                CALL GetEstimatedCookingTime(v_cooking_order_id, v_estimated_time);
+
+                -- Check if the order is ready (cooked)
+                IF TIMESTAMPADD(MINUTE, v_estimated_time, v_start_time) <= NOW() THEN
+                    -- Call ProcessCompletedOrder to process the order
+                    CALL ProcessCompletedOrder(v_cooking_order_id, v_success);
+
+                    -- If the order was successfully processed, delete it from OrdersCooking
+                    IF v_success THEN
+                        DELETE FROM OrdersCooking WHERE cooking_order_id = v_cooking_order_id;
+                    END IF;
+                END IF;
+            END IF;
+        END WHILE;
+
+        -- Close the cursor
+        CLOSE cur;
+
+        -- Check if OrdersCooking is empty after processing
+        IF (SELECT COUNT(*) FROM OrdersCooking) = 0 THEN
+            SET p_time_remaining = 5;
+        ELSE
+            -- Find the next closest time to be processed
+            SELECT MIN(TIMESTAMPDIFF(MINUTE, NOW(), TIMESTAMPADD(MINUTE, v_estimated_time, start_time)))
+            INTO p_time_remaining
+            FROM OrdersCooking oc
+            JOIN OrdersCookingDish ocd ON oc.cooking_order_id = ocd.cooking_order_id;
+
+            IF p_time_remaining IS NULL THEN
+                SET p_time_remaining = 5;  -- Default to 5 minutes if no orders
+            END IF;
+        END IF;
+    END IF;
+
+END $$
+
+DELIMITER ;
+
+
+
+-- -----------------------------------------------------------------------------------------------
+CREATE TABLE Manager (
+  id INT AUTO_INCREMENT PRIMARY KEY,
+  name VARCHAR(32) NOT NULL,
+  phone_number CHAR(10) NOT NULL UNIQUE,
+  email VARCHAR(30) NOT NULL UNIQUE,
+  password CHAR(64) NOT NULL,
+  restaurant_id INT,
+  favorite_food VARCHAR(50),
+  isActive BOOLEAN DEFAULT TRUE,
+  isOnline BOOLEAN DEFAULT TRUE,
+  FOREIGN KEY (restaurant_id) REFERENCES Restaurant(id)
+);
+
+CREATE TABLE Manager_Logs (
+  manager_id INT NOT NULL,
+  activity VARCHAR(50) NOT NULL,
+  time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+  CREATE TABLE Deleted_Manager (
+    manager_id INT NOT NULL,
+    deleted_timestamp TIMESTAMP DEFAULT NOW()
+  );
+
+
+DELIMITER $$
+
+-- Register Manager
+DELIMITER $$
+
+CREATE PROCEDURE registerManager(
+    IN p_name VARCHAR(32),
+    IN p_phone_number CHAR(10),
+    IN p_email VARCHAR(30),
+    IN p_password CHAR(64),
+    IN p_favorite_food VARCHAR(50),
+    IN p_restaurant_id INT,
+    OUT p_manager_id INT
+)
+BEGIN
+
+    INSERT INTO Manager (name, phone_number, email, password, favorite_food, restaurant_id)
+    VALUES (p_name, p_phone_number, p_email, p_password, p_favorite_food, p_restaurant_id);
+
+    -- Retrieve the last inserted manager ID
+    SET p_manager_id = LAST_INSERT_ID();
+
+    -- Log manager registration
+    INSERT INTO Manager_Logs (manager_id, activity)
+    VALUES (p_manager_id, 'Registered account');
+
+    COMMIT;
+
+END $$
+
+DELIMITER ;
+
+-- Update Name
+
+DELIMITER $$
+
+CREATE PROCEDURE UpdateManagerName(
+    IN p_manager_id INT,
+    IN p_name VARCHAR(32),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Update manager name
+    UPDATE Manager
+    SET name = p_name
+    WHERE id = p_manager_id;
+    
+    -- Log name update
+    INSERT INTO Manager_Logs (manager_id, activity)
+    VALUES (p_manager_id, 'Updated name');
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE UpdateManagerPhoneNumber(
+    IN p_manager_id INT,
+    IN p_phone_number CHAR(10),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Update manager phone number
+    UPDATE Manager
+    SET phone_number = p_phone_number
+    WHERE id = p_manager_id;
+    
+    -- Log phone number update
+    INSERT INTO Manager_Logs (manager_id, activity)
+    VALUES (p_manager_id, 'Updated phone number');
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE UpdateManagerEmail(
+    IN p_manager_id INT,
+    IN p_email VARCHAR(30),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Update manager email
+    UPDATE Manager
+    SET email = p_email
+    WHERE id = p_manager_id;
+    
+    -- Log email update
+    INSERT INTO Manager_Logs (manager_id, activity)
+    VALUES (p_manager_id, 'Updated email');
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE UpdateManagerPassword(
+    IN p_manager_id INT,
+    IN p_password CHAR(64),
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Update manager password
+    UPDATE Manager
+    SET password = p_password
+    WHERE id = p_manager_id;
+    
+    -- Log password update
+    INSERT INTO Manager_Logs (manager_id, activity)
+    VALUES (p_manager_id, 'Updated password');
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+
+DELIMITER $$
+
+CREATE PROCEDURE UpdateManagerRestaurant(
+    IN p_manager_id INT,
+    IN p_restaurant_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Update manager restaurant
+    UPDATE Manager
+    SET restaurant_id = p_restaurant_id
+    WHERE id = p_manager_id;
+    
+    -- Log restaurant update
+    INSERT INTO Manager_Logs (manager_id, activity)
+    VALUES (p_manager_id, 'Updated restaurant association');
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE UpdateManagerIsActive(
+    IN p_manager_id INT,
+    IN p_isActive BOOLEAN,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Update manager isActive status
+    UPDATE Manager
+    SET isActive = p_isActive
+    WHERE id = p_manager_id;
+    
+    -- Log isActive update
+    INSERT INTO Manager_Logs (manager_id, activity)
+    VALUES (p_manager_id, CONCAT('Updated isActive status to ', p_isActive));
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE UpdateManagerIsOnline(
+    IN p_manager_id INT,
+    IN p_isOnline BOOLEAN,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Update manager isOnline status
+    UPDATE Manager
+    SET isOnline = p_isOnline
+    WHERE id = p_manager_id;
+    
+    -- Log isOnline update
+    INSERT INTO Manager_Logs (manager_id, activity)
+    VALUES (p_manager_id, CONCAT('Updated isOnline status to ', p_isOnline));
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE SoftDeleteManager(
+    IN p_manager_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Set isActive to FALSE
+    UPDATE Manager
+    SET isActive = FALSE
+    WHERE id = p_manager_id;
+
+    -- Log soft delete
+    INSERT INTO Manager_Logs (manager_id, activity)
+    VALUES (p_manager_id, 'Soft deleted account');
+
+    -- Insert into Deleted_Manager
+    INSERT INTO Deleted_Manager (manager_id)
+    VALUES (p_manager_id);
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE LoginManager(
+    IN p_manager_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Set isOnline to TRUE
+    UPDATE Manager
+    SET isOnline = TRUE
+    WHERE id = p_manager_id;
+
+    -- Log login activity
+    INSERT INTO Manager_Logs (manager_id, activity)
+    VALUES (p_manager_id, 'Logged In');
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+DELIMITER $$
+
+CREATE PROCEDURE LogoutManager(
+    IN p_manager_id INT,
+    OUT p_success BOOLEAN
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        SET p_success = FALSE;
+        ROLLBACK;
+    END;
+
+    START TRANSACTION;
+
+    -- Set isOnline to FALSE
+    UPDATE Manager
+    SET isOnline = FALSE
+    WHERE id = p_manager_id;
+
+    -- Log logout activity
+    INSERT INTO Manager_Logs (manager_id, activity)
+    VALUES (p_manager_id, 'Logged Out');
+
+    COMMIT;
+    SET p_success = TRUE;
+END $$
+
+DELIMITER ;
+
+
+
+-- Views 
+CREATE VIEW IF NOT EXISTS View_Course AS SELECT id, name FROM Course;
+CREATE VIEW IF NOT EXISTS View_Cuisine AS SELECT id, name FROM Cuisine;
+CREATE VIEW IF NOT EXISTS View_Diet AS SELECT id, name FROM Diet;
+CREATE VIEW IF NOT EXISTS View_Dish AS SELECT * FROM Dish;
+
+CREATE VIEW GetManagerID AS
+SELECT id, name, phone_number, email, password, restaurant_id, favorite_food
+FROM Manager;
+
+CREATE VIEW GetManagerPhone AS
+SELECT id, name, phone_number, email, password, restaurant_id, favorite_food
+FROM Manager;
+
+
+
+
+-- Values to insert
+INSERT INTO Cuisine (name) VALUES
+('Italian'), ('French'), ('Chinese'), ('Indian'), ('Mexican'),
+('Japanese'), ('Thai'), ('Korean'), ('Mediterranean'), ('American'),
+('British'), ('German'), ('Spanish'), ('Middle Eastern'), ('African'),
+('Brazilian'), ('Argentine'), ('Peruvian'), ('Vietnamese'), ('Moroccan');
+
+INSERT INTO Diet (name) VALUES
+('Vegetarian'), ('Vegan'), ('Ketogenic'), ('Paleo'), ('Mediterranean'),
+('Gluten-Free'), ('Low-Carb'), ('High-Protein'), ('Dash'), ('Flexitarian'),
+('Pescatarian'), ('Whole30'), ('Raw Vegan'), ('Ayurvedic'), ('Macrobiotic'),
+('Low-FODMAP'), ('Primal'), ('South Beach'), ('Dukan'), ('Blood Type');
+
+INSERT INTO Course (name) VALUES
+('Appetizer'), ('Salad'), ('Soup'), ('Main Course'), ('Side Dish'),
+('Dessert'), ('Bread'), ('Pasta'), ('Rice'), ('Seafood'),
+('Meat'), ('Vegetarian'), ('Vegan'), ('Pizza'), ('Burger'),
+('Sushi'), ('Taco'), ('Curry'), ('Dim Sum'), ('Steak');
+
+INSERT INTO Theme (name) VALUES
+('Modern'), ('Classic'), ('Rustic'), ('Industrial'), ('Minimalist'),
+('Mediterranean'), ('Asian Fusion'), ('Tropical'), ('Art Deco'), ('Vintage'),
+('Steampunk'), ('Nautical'), ('Baroque'), ('Gothic'), ('Pop Art'),
+('Retro'), ('Futuristic'), ('Eclectic'), ('Farmhouse'), ('Bohemian');
+
+INSERT INTO Restaurant (name, address, theme_id, rCode) VALUES
+    ('Shails Restaurant', '123 Main St', 1, '3QIUWTU4'),
+    ('Sushi Delight', '456 Elm St', 2, 'AB12CD34'),
+    ('Pizza Hut', '789 Oak St', 3, 'EF56GH78'),
+    ('Burger King', '101 Pine St', 4, 'IJ90KL87'),
+    ('Taco Bell', '202 Maple St', 5, 'MN65OP43'),
+    ('Subway', '303 Birch St', 6, 'QR21ST09'),
+    ('Starbucks', '404 Willow St', 7, 'UV76WX54'),
+    ('Dunkin Donuts', '505 Cedar St', 8, 'YZ89AB01'),
+    ('McDonald s', '606 Chestnut St', 9, 'CD12EF34'),
+    ('KFC', '707 Walnut St', 10, 'GH56IJ78'),
+    ('Wendys', '808 Hickory St', 11, 'KL87MN65'),
+    ('Chipotle Mexican Grill', '909 Maple St', 12, 'OP43QR21'),
+    ('Panera Bread', '1010 Oak St', 13, 'ST09UV76'),
+    ('Five Guys Burgers and Fries', '202 Elm St', 14, 'WX54YZ89'),
+    ('In-N-Out Burger', '303 Main St', 15, 'AB01CD12'),
+    ('Shake Shack', '404 Pine St', 16, 'EF34GH56'),
+    ('White Castle', '505 Willow St', 17, 'IJ78KL87'),
+    ('Raising Canes Chicken Fingers', '606 Cedar St', 18, 'MN65OP43'),
+    ('Little Caesars Pizza', '707 Chestnut St', 19, 'QR21ST09'),
+    ('Papa Johns Pizza', '808 Walnut St', 20, 'UV76WX54');
+
+INSERT INTO Manager (name, phone_number, email, password, restaurant_id, favorite_food) VALUES
+  ('John Doe', '9234567890', 'johndoe@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 1, 'Pizza'),
+  ('Jane Smith', '9876543210', 'janesmith@example.com', 'c6ba91b90d922e159893f46c387e5dc1b3dc5c101a5a4522f03b987177a24a91', 2, 'Sushi'),
+  ('Alice Johnson', '9555555555', 'alicejohnson@example.com', '5efc2b017da4f7736d192a74dde5891369e0685d4d38f2a455b6fcdab282df9c', 3, 'Burger'),
+  ('Michael Brown', '7987654321', 'michaelbrown@example.com', '4c395c424720e081493be06ec2fefa65c2925e0c3695f58e26f710edd9041ee1', 4, 'Tacos'),
+  ('Sarah Garcia', '8122334455', 'sarahgarcia@example.com', '19cb0711df0a5c9915c57bc8209b23da7b9ecae22627bc957eb25bcf53182a81', 5, 'Pasta'),
+  ('David Miller', '8233445566', 'davidmiller@example.com', 'facbd7953fa9ee64e1c57738eae96c5f32c415b370111de2b3cfa6b59b23ad00', 6, 'Steak');
+
+  INSERT INTO Customer (name, phone_number, email, password, favorite_food) VALUES
+  ('John Doe', '9234567890', 'johndoe@example.com', 'ef92b778bafe771e89245b89ecbc08a44a4e166c06659911881f383d4473e94f', 'Pizza'),
+  ('Jane Smith', '9876543210', 'janesmith@example.com', 'c6ba91b90d922e159893f46c387e5dc1b3dc5c101a5a4522f03b987177a24a91', 'Sushi'),
+  ('Alice Johnson', '8555555555', 'alicejohnson@example.com', '5efc2b017da4f7736d192a74dde5891369e0685d4d38f2a455b6fcdab282df9c', 'Burger'),
+  ('Michael Brown', '9987654321', 'michaelbrown@example.com', '4c395c424720e081493be06ec2fefa65c2925e0c3695f58e26f710edd9041ee1', 'Tacos'),
+  ('Sarah Garcia', '8122334455', 'sarahgarcia@example.com', '19cb0711df0a5c9915c57bc8209b23da7b9ecae22627bc957eb25bcf53182a81', 'Pasta'),
+  ('David Miller', '7233445566', 'davidmiller@example.com', 'facbd7953fa9ee64e1c57738eae96c5f32c415b370111de2b3cfa6b59b23ad00', 'Steak');
+
+  INSERT INTO Dish (name, price, course_id, preparation_time) VALUES
+  ('Pizza Margherita', 800, 1, 20),
+  ('Spaghetti Bolognese', 700, 1, 30),
+  ('Chicken Tikka Masala', 900, 2, 45),
+  ('Butter Chicken', 850, 2, 35),
+  ('Vegetable Biryani', 750, 3, 40),
+  ('Paneer Tikka Masala', 800, 2, 30),
+  ('Vegetable Korma', 750, 2, 35),
+  ('Dal Makhani', 600, 2, 25),
+  ('Sushi Platter', 1200, 4, 30),
+  ('Salmon Nigiri', 300, 4, 15),
+  ('Tuna Sashimi', 250, 4, 15),
+  ('Chicken Katsu Curry', 800, 1, 30),
+  ('Beef Bulgogi', 1000, 1, 35),
+  ('Kimchi Fried Rice', 700, 3, 25),
+  ('Pad Thai', 800, 3, 20),
+  ('Tom Yum Soup', 500, 4, 15),
+  ('Green Curry Chicken', 850, 2, 30),
+  ('Massaman Curry', 800, 2, 35),
+  ('Pad See Ew', 750, 3, 20),
+  ('Som Tam', 600, 4, 15);
+
+  INSERT INTO Dish_Diet (dish_id, diet_id) VALUES
+  (1, 1), (2, 1), (3, 2), (4, 2), (5, 3), (6, 3), (7, 3), (8, 3), (9, 4), (10, 4),
+  (11, 4), (12, 1), (13, 1), (14, 3), (15, 3), (16, 4), (17, 2), (18, 2), (19, 3), (20, 3),
+  (1, 2), (2, 2), (3, 1), (4, 1), (5, 4), (6, 4), (7, 2), (8, 2), (9, 1), (10, 1),
+  (11, 1), (12, 3), (13, 3), (14, 2), (15, 2), (16, 1), (17, 1), (18, 3), (19, 4), (20, 4);
+
+  INSERT INTO Dish_Cuisine (dish_id, cuisine_id) VALUES
+  (1, 1), (2, 1), (3, 2), (4, 2), (5, 3), (6, 3), (7, 3), (8, 3), (9, 4), (10, 4),
+  (11, 4), (12, 1), (13, 1), (14, 3), (15, 3), (16, 4), (17, 2), (18, 2), (19, 3), (20, 3),
+  (1, 2), (2, 2), (3, 1), (4, 1), (5, 4), (6, 4), (7, 2), (8, 2), (9, 1), (10, 1),
+  (11, 1), (12, 3), (13, 3), (14, 2), (15, 2), (16, 1), (17, 1), (18, 3), (19, 4), (20, 4);
+
+  INSERT INTO Customer_Address (customer_id, address) VALUES
+  (1, '123 Main Street, Cityville'),
+  (1, '456 Elm Street, Townville'),
+  (2, '789 Oak Street, Countryville'),
+  (2, '101 Pine Street, Villageville'),
+  (3, '202 Maple Street, Suburbia'),
+  (4, '303 Birch Street, Metropolis'),
+  (5, '404 Willow Street, Megalopolis'),
+  (5, '505 Cedar Street, Hamletsville');
+
+  INSERT INTO Restaurant_Menu (restaurant_id, dish_id) VALUES
+  (1, 1), (2, 2), (3, 3), (4, 4), (5, 5), (6, 6), (7, 7), (8, 8), (9, 9), (10, 10),
+  (11, 11), (12, 12), (13, 13), (14, 14), (15, 15), (16, 16), (17, 17), (18, 18), (19, 19), (20, 20),
+  (1, 2), (2, 3), (3, 4), (4, 5), (5, 6), (6, 7), (7, 8), (8, 9), (9, 10), (10, 11),
+  (11, 12), (12, 13), (13, 14), (14, 15), (15, 16), (16, 17), (17, 18), (18, 19), (19, 20), (20, 1);
+
+  INSERT INTO OrdersCooking (customer_id, restaurant_id, address_id) VALUES
+  (1, 1, 1), (2, 2, 2), (3, 3, 3), (4, 4, 4), (5, 5, 5),
+  (1, 6, 6), (2, 7, 7), (3, 8, 8), (4, 9, 9), (5, 10, 10),
+  (1, 11, 11), (2, 12, 12), (3, 13, 13), (4, 14, 14), (5, 15, 15),
+  (1, 16, 16), (2, 17, 17), (3, 18, 18), (4, 19, 19), (5, 20, 20);
+
+  INSERT INTO OrdersCookingDish (cooking_order_id, dish_id, quantity) VALUES
+  (2, 1, 2), (2, 2, 1), (3, 3, 3), (3, 4, 2), (4, 5, 1), (4, 6, 2), (5, 7, 3), (5, 8, 1), (6, 9, 2), (6, 10, 1),
+  (7, 11, 2), (7, 12, 1), (8, 13, 3), (8, 14, 2), (9, 15, 1), (9, 16, 2), (10, 17, 3), (10, 18, 1), (11, 19, 2), (11, 20, 1),
+  (12, 1, 1), (12, 2, 2), (13, 3, 3), (13, 4, 1), (14, 5, 2), (14, 6, 1), (15, 7, 3), (15, 8, 2), (16, 9, 1), (16, 10, 2),
+  (17, 11, 1), (17, 12, 2), (18, 13, 3), (18, 14, 1), (19, 15, 2), (19, 16, 1), (20, 17, 3), (20, 18, 2), (3, 19, 1), (2, 20, 2),
+  (2, 1, 2), (13, 2, 1), (14, 3, 3), (15, 4, 2), (16, 5, 1), (17, 6, 2), (18, 7, 3), (19, 8, 1), (20, 9, 2), (20, 10, 1);
+INSERT INTO Customer_Order (address_id, customer_id, restaurant_id, order_time) VALUES
+  (1, 1, 1, TIMESTAMPADD(HOUR, -3, CURRENT_TIMESTAMP)),
+  (2, 1, 2, TIMESTAMPADD(HOUR, -2, CURRENT_TIMESTAMP)),
+  (3, 2, 3, TIMESTAMPADD(HOUR, -4, CURRENT_TIMESTAMP)),
+  (4, 2, 4, TIMESTAMPADD(HOUR, -1, CURRENT_TIMESTAMP)),
+  (5, 3, 5, TIMESTAMPADD(HOUR, -3, CURRENT_TIMESTAMP)),
+  (6, 3, 6, TIMESTAMPADD(HOUR, -2, CURRENT_TIMESTAMP)),
+  (7, 4, 7, TIMESTAMPADD(HOUR, -4, CURRENT_TIMESTAMP)),
+  (8, 4, 8, TIMESTAMPADD(HOUR, -1, CURRENT_TIMESTAMP)),
+  (1, 5, 9, TIMESTAMPADD(HOUR, -3, CURRENT_TIMESTAMP)),
+  (2, 5, 10, TIMESTAMPADD(HOUR, -2, CURRENT_TIMESTAMP)),
+  (3, 1, 11, TIMESTAMPADD(HOUR, -4, CURRENT_TIMESTAMP)),
+  (4, 1, 12, TIMESTAMPADD(HOUR, -1, CURRENT_TIMESTAMP)),
+  (5, 2, 13, TIMESTAMPADD(HOUR, -3, CURRENT_TIMESTAMP)),
+  (6, 2, 14, TIMESTAMPADD(HOUR, -2, CURRENT_TIMESTAMP)),
+  (7, 3, 15, TIMESTAMPADD(HOUR, -4, CURRENT_TIMESTAMP)),
+  (8, 3, 16, TIMESTAMPADD(HOUR, -1, CURRENT_TIMESTAMP)),
+  (1, 4, 17, TIMESTAMPADD(HOUR, -3, CURRENT_TIMESTAMP)),
+  (2, 4, 18, TIMESTAMPADD(HOUR, -2, CURRENT_TIMESTAMP)),
+  (3, 5, 19, TIMESTAMPADD(HOUR, -4, CURRENT_TIMESTAMP)),
+  (4, 5, 20, TIMESTAMPADD(HOUR, -1, CURRENT_TIMESTAMP));
+
+  INSERT INTO Order_Dish (order_id, dish_id, quantity) VALUES
+  (1, 1, 2), (1, 2, 1), (2, 3, 3), (2, 4, 2), (3, 5, 1), (3, 6, 2),
+  (4, 7, 3), (4, 8, 1), (5, 9, 2), (5, 10, 1), (6, 11, 2), (6, 12, 1),
+  (7, 13, 3), (7, 14, 2), (8, 15, 1), (8, 16, 2), (9, 17, 3), (9, 18, 1),
+  (10, 1, 2), (10, 2, 1);
